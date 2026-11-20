@@ -1,0 +1,16 @@
+{
+  "name": "Ciclo - agenda em 24 horas",
+  "short_name": "Ciclo",
+  "description": "Agenda circular de 24 horas.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "pt-BR",
+  "background_color": "#EEF1FF",
+  "theme_color": "#2B50FF",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}

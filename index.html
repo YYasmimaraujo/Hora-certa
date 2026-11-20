@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2B50FF">
+<meta name="description" content="Hora certa: agenda em um relógio de 24 horas. Arraste no círculo para criar compromissos.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Hora certa · agenda em 24 horas</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;500;800&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="auth" id="auth">
+  <form id="authForm" novalidate>
+    <h2>Hora certa</h2>
+    <p class="sub">Entre para consultar sua agenda, inclusive os dias que já passaram.</p>
+    <label id="nameRow">Nome <input id="aName" autocomplete="name"></label>
+    <label>E-mail <input id="aMail" type="email" autocomplete="email"></label>
+    <label>Senha <input id="aPass" type="password" autocomplete="current-password"></label>
+    <p class="err" id="aErr" role="alert"></p>
+    <button class="btn primary" id="aGo">Entrar</button>
+    <button type="button" class="btn" id="aSwitch">Criar conta</button>
+    <button type="button" class="btn guest" id="aGuest">Entrar como visitante (demo)</button>
+    <button type="button" class="link" id="aForgot" style="display:none">Esqueci minha senha</button>
+    <p class="sub small" id="aNote">Login local: contas e compromissos ficam somente neste navegador, sem servidor. Use “Exportar” para levar um backup para outro aparelho.</p>
+  </form>
+</div>
+<div class="app">
+  <a class="skip" href="#list">Ir para a lista de compromissos</a>
+  <header>
+    <h1>Hora certa<small id="dateLabel"></small></h1>
+    <button class="btn" id="prev" aria-label="Dia anterior">‹</button>
+    <button class="btn" id="today">Hoje</button>
+    <button class="btn" id="next" aria-label="Próximo dia">›</button>
+    <button class="btn primary" id="add">Novo compromisso</button>
+  </header>
+  <div class="userbar">
+    <button type="button" class="me" id="me" aria-label="Minha conta"><i class="avatar" id="avSm"></i><span id="hello"></span></button>
+    <button type="button" id="hist">Histórico</button>
+    <button type="button" id="exp">Exportar</button>
+    <button type="button" id="imp">Importar</button>
+    <button type="button" id="out">Sair</button>
+    <input type="file" id="file" accept="application/json" hidden>
+  </div>
+
+  <div class="layout" role="main">
+    <section>
+      <div class="dialwrap">
+        <svg id="dial" viewBox="0 0 640 640" role="group" aria-label="Relógio de 24 horas com os compromissos do dia"></svg>
+        <div class="center"><div class="big" id="cBig"></div><div class="sub" id="cSub"></div></div>
+      </div>
+      <p class="hint" id="hint">Arraste sobre o círculo para criar um compromisso. Clique em um arco para editar. Atalhos: ← → trocam o dia e N cria um compromisso.</p>
+    </section>
+    <aside>
+      <div class="week" id="week"></div>
+      <ul class="list" id="list"></ul>
+    </aside>
+  </div>
+</div>
+
+<dialog id="dlg">
+  <form id="form" novalidate>
+    <h3 id="dlgTitle">Novo compromisso</h3>
+    <label>Título <input id="fTitle" maxlength="60" autocomplete="off"></label>
+    <div class="row">
+      <label>Início <input id="fStart" type="time"></label>
+      <label>Fim (ou dia seguinte) <input id="fEnd" type="time"></label>
+    </div>
+    <label>Categoria <select id="fCat"></select></label>
+    <label>Lembrete <select id="fRem"><option value="">Sem lembrete</option><option value="0">Na hora</option><option value="5">5 min antes</option><option value="15">15 min antes</option><option value="30">30 min antes</option><option value="60">1 hora antes</option></select></label>
+    <p class="err" id="err" role="alert"></p>
+    <div class="foot">
+      <button type="button" class="btn danger" id="del">Excluir</button>
+      <button type="button" class="btn" id="cancel">Cancelar</button>
+      <button type="submit" class="btn primary">Salvar compromisso</button>
+    </div>
+  </form>
+</dialog>
+<dialog id="hdlg">
+  <div class="hbox">
+    <h3>Histórico</h3>
+    <input id="hq" type="search" placeholder="Buscar compromisso" autocomplete="off">
+    <ul class="list" id="hlist"></ul>
+    <button type="button" class="btn" id="hclose">Fechar</button>
+  </div>
+</dialog>
+<dialog id="rdlg">
+  <form id="rForm" novalidate>
+    <h3>Criar nova senha</h3>
+    <label>Nova senha <input id="rPass" type="password" autocomplete="new-password"></label>
+    <p class="err" id="rErr" role="alert"></p>
+    <div class="foot"><button class="btn primary" type="submit">Salvar senha</button></div>
+  </form>
+</dialog>
+<dialog id="adlg">
+  <div class="hbox acc">
+    <div class="prof">
+      <i class="avatar big" id="avBig"></i>
+      <div><h3 id="aName2"></h3><p class="sub" id="aMail2"></p><p class="sub small" id="aSince"></p></div>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div class="bars" id="bars"></div>
+    <form id="nameForm" novalidate>
+      <label>Nome <input id="nNew" maxlength="40" autocomplete="name"></label>
+      <button class="btn" type="submit">Salvar nome</button>
+    </form>
+    <form id="pwForm" novalidate>
+      <label>Senha atual <input id="pOld" type="password" autocomplete="current-password"></label>
+      <label>Nova senha <input id="pNew" type="password" autocomplete="new-password"></label>
+      <p class="err" id="pwErr" role="alert"></p>
+      <button class="btn" type="submit">Trocar senha</button>
+    </form>
+    <div class="foot">
+      <button type="button" class="btn danger" id="delAcc">Excluir conta</button>
+      <button type="button" class="btn primary" id="aClose">Fechar</button>
+    </div>
+  </div>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3"></script>
+<script src="js/config.js"></script>
+<script src="js/core.js"></script>
+<script src="js/cloud.js"></script>
+<script src="js/render.js"></script>
+<script src="js/dial-input.js"></script>
+<script src="js/events.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/history.js"></script>
+<script src="js/reminders.js"></script>
+<script src="js/account.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
